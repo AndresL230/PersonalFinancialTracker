@@ -68,21 +68,38 @@ def add():
     description = get_description()
     CSV.add_entry(date, amount, category, description)
 
-def plot_transactions(df):
-    df.set_index('Date', inplace= True)
 
-    income_df = df[df['Category'] == 'Income'].resample("D").sum().reindex(df.index,fill_value=0)
-    expense_df = df[df['Category'] == 'Expense'].resample("D").sum().reindex(df.index,fill_value=0)
-    plt.figure(figsize=(10,5))
-    plt.plot(income_df.index, income_df['Amount'], label='Income',color='g')
-    plt.plot(expense_df.index, expense_df['Amount'], label='Expense', color='r')
+def plot_transactions(df):
+    plot_df = df.copy()
+    
+    plot_df['Date'] = pd.to_datetime(plot_df['Date'])
+    
+    plot_df.set_index('Date', inplace=True)
+    
+    income_df = plot_df[plot_df['Category'] == 'Income']
+    expense_df = plot_df[plot_df['Category'] == 'Expense']
+    
+    income_by_date = income_df.groupby(income_df.index.date)['Amount'].sum()
+    expense_by_date = expense_df.groupby(expense_df.index.date)['Amount'].sum()
+    
+    income_by_date.index = pd.to_datetime(income_by_date.index)
+    expense_by_date.index = pd.to_datetime(expense_by_date.index)
+    
+    income_by_date = income_by_date.sort_index()
+    expense_by_date = expense_by_date.sort_index()
+    
+    plt.figure(figsize=(12, 6))
+    plt.plot(income_by_date.index, income_by_date.values, 'g-', marker='o', label='Income')
+    plt.plot(expense_by_date.index, expense_by_date.values, 'r-', marker='o', label='Expense')
+    
     plt.xlabel('Date')
-    plt.ylabel('Amount')
-    plt.title('Income Expenses Over Time')
+    plt.ylabel('Amount ($)')
+    plt.title('Income vs Expenses Over Time')
     plt.legend()
     plt.grid(True)
+    plt.gcf().autofmt_xdate()
+    plt.tight_layout()
     plt.show()
-
 
 def main():
     while True:
@@ -96,6 +113,7 @@ def main():
             end_date =  get_date('Enter the end date (dd-mm-yyyy): ')
             df = CSV.get_transactions(start_date, end_date)
             if input('Do you want to see a plot(Y/N): ').upper() == 'Y':
+                print("Preparing to display plot...")
                 plot_transactions(df)
         elif choice == '3':
             print('Exiting...')
