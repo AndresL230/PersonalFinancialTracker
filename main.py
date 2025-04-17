@@ -68,7 +68,7 @@ def add():
     description = get_description()
     CSV.add_entry(date, amount, category, description)
 
-'''def plot_transactions(df):
+def plot_transactions(df):
     df.set_index('Date', inplace= True)
 
     income_df = df[df['Category'] == 'Income'].resample("D").sum().reindex(df.index,fill_value=0)
@@ -82,7 +82,7 @@ def add():
     plt.legend()
     plt.grid(True)
     plt.show()
-'''
+
 
 def main():
     while True:
@@ -95,8 +95,8 @@ def main():
             start_date = get_date('Enter the start date (dd-mm-yyyy): ')
             end_date =  get_date('Enter the end date (dd-mm-yyyy): ')
             df = CSV.get_transactions(start_date, end_date)
-            #if input('Do you want to see a plot(Y/N): ').upper() == 'Y':
-            #    plot_transactions(df)
+            if input('Do you want to see a plot(Y/N): ').upper() == 'Y':
+                plot_transactions(df)
         elif choice == '3':
             print('Exiting...')
             break
@@ -105,3 +105,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+
